@@ -29,6 +29,10 @@ public class AccountService {
         return wallet;
     }
 
+    public LedgerAccount getAccount(String accountId){
+        return chart.get(accountId);
+    }
+
     public Money balanceOf(String accountId) {
         return ledger.balanceOf(accountId);
     }

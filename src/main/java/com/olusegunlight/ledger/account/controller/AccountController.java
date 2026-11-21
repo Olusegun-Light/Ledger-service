@@ -46,4 +46,11 @@ public class AccountController {
     public BalanceResponse deposit(@PathVariable String accountId, @RequestBody DepositRequest request) {
         return BalanceResponse.of(accountId, accountService.deposit(accountId, request.amount()));
     }
+
+    @GetMapping("/{accountId}")
+    @Operation(summary = "Get  an account's details")
+    public AccountResponse open(@PathVariable String accountId){
+        return AccountResponse.from(accountService.getAccount(accountId));
+    }
+
 }
