@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
+import com.olusegunlight.ledger.transaction.dto.EntryResponse;
 
 @RestController
 @RequestMapping("/api/v1/accounts")
@@ -51,6 +53,12 @@ public class AccountController {
     @Operation(summary = "Get  an account's details")
     public AccountResponse open(@PathVariable String accountId){
         return AccountResponse.from(accountService.getAccount(accountId));
+    }
+
+    @GetMapping("/{accountId}/statement")
+    @Operation(summary = "List every journal entry that touched an account, oldest first")
+    public List<EntryResponse> statement(@PathVariable String accountId) {
+        return accountService.statement(accountId).stream().map(EntryResponse::from).toList();
     }
 
 }

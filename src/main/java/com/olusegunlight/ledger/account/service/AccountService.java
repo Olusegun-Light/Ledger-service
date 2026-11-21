@@ -9,6 +9,9 @@ import com.olusegunlight.ledger.domain.InMemoryLedger;
 import com.olusegunlight.ledger.domain.LedgerAccount;
 import com.olusegunlight.ledger.domain.LedgerCommand.Deposit;
 import org.springframework.stereotype.Service;
+import com.olusegunlight.ledger.domain.JournalEntry;
+
+import java.util.List;
 
 @Service
 public class AccountService {
@@ -41,5 +44,10 @@ public class AccountService {
         Money money = Money.fromMajor(amount, Currency.NGN);
         ledger.post(entryFactory.toEntry(new Deposit(walletId, money)));
         return ledger.balanceOf(walletId);
+    }
+
+    public List<JournalEntry> statement(String accountId) {
+        chart.get(accountId);
+        return ledger.entriesFor(accountId);
     }
 }
