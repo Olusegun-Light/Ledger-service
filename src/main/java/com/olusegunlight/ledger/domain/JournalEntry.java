@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 public record JournalEntry(String id, String description, List<Posting> postings) {
 
@@ -58,5 +59,35 @@ public record JournalEntry(String id, String description, List<Posting> postings
 
     public List<String> accountIds() {
         return postings.stream().map(Posting::accountId).distinct().toList();
+    }
+
+    public static Builder builder(String id, String description) {
+        return new Builder(id, description);
+    }
+
+    public static final class Builder {
+
+        private final String id;
+        private final String description;
+        private final List<Posting> postings = new ArrayList<>();
+
+        private Builder(String id, String description) {
+            this.id = id;
+            this.description = description;
+        }
+
+        public Builder debit(String accountId, Money amount) {
+            postings.add(Posting.debit(accountId, amount));
+            return this;
+        }
+
+        public Builder credit(String accountId, Money amount) {
+            postings.add(Posting.credit(accountId, amount));
+            return this;
+        }
+
+        public JournalEntry build() {
+            return new JournalEntry(id, description, postings);
+        }
     }
 }
