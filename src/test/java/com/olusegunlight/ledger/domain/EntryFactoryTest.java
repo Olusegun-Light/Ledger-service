@@ -5,6 +5,7 @@ import com.olusegunlight.ledger.common.Money;
 import com.olusegunlight.ledger.domain.LedgerCommand.Deposit;
 import com.olusegunlight.ledger.domain.LedgerCommand.Transfer;
 import com.olusegunlight.ledger.domain.LedgerCommand.Withdrawal;
+import com.olusegunlight.ledger.domain.LedgerCommand.Reversal;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,5 +61,28 @@ class EntryFactoryTest {
         Deposit deposit = new Deposit("wallet:light", naira(100L));
 
         assertThat(factory.toEntry(deposit).id()).isNotEqualTo(factory.toEntry(deposit).id());
+    }
+
+    @Test
+    void reversalFlipsEveryPostingOfTheOriginal() {
+        JournalEntry original = factory.toEntry(
+                new Transfer("wallet:light", "wallet:ada", naira(10_000_00L), naira(25_00L)));
+
+        JournalEntry reversal = factory.toEntry(new Reversal(original));
+
+        assertThat(reversal.postings()).containsExactly(
+                Posting.credit("wallet:light", naira(10_025_00L)),
+                Posting.debit("wallet:ada", naira(10_000_00L)),
+                Posting.debit(EntryFactory.FEE_ACCOUNT, naira(25_00L)));
+        assertThat(reversal.description()).isEqualTo("Reversal of " + original.id());
+    }
+
+    @Test
+    void originalPlusReversalLeavesEveryAccountUnchanged() {
+        JournalEntry original = factory.toEntry(new Deposit("wallet:light", naira(5_000_00L)));
+        JournalEntry reversal = factory.toEntry(new Reversal(original));
+
+        original.netChangeByAccount().forEach((accountId, change) ->
+                assertThat(change.plus(reversal.netChangeByAccount().get(accountId)).isZero()).isTrue());
     }
 }

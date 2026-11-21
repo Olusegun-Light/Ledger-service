@@ -8,4 +8,6 @@ public sealed interface LedgerCommand {
     record Withdrawal(String walletId, Money amount) implements LedgerCommand {}
 
     record Transfer(String fromWalletId, String toWalletId, Money amount, Money fee) implements LedgerCommand {}
+
+    record Reversal(JournalEntry original) implements LedgerCommand {}
 }

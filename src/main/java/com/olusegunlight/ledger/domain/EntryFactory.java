@@ -4,6 +4,7 @@ import com.olusegunlight.ledger.common.Money;
 import com.olusegunlight.ledger.domain.LedgerCommand.Deposit;
 import com.olusegunlight.ledger.domain.LedgerCommand.Transfer;
 import com.olusegunlight.ledger.domain.LedgerCommand.Withdrawal;
+import com.olusegunlight.ledger.domain.LedgerCommand.Reversal;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,9 @@ public class EntryFactory {
                             Posting.debit(from, amount.plus(fee)),
                             Posting.credit(to, amount),
                             Posting.credit(FEE_ACCOUNT, fee)));
+
+            case Reversal(JournalEntry original) ->
+                    new JournalEntry(id, "Reversal of " + original.id(), original.postings().stream().map(Posting::reversed).toList());
         };
     }
 }

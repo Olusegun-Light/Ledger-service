@@ -25,4 +25,9 @@ public record Posting(String accountId, Direction direction, Money amount) {
     public Money signedAmount() {
         return direction == Direction.DEBIT ? amount : amount.negate();
     }
+
+    public Posting reversed() {
+        Direction opposite = direction == Direction.DEBIT ? Direction.CREDIT : Direction.DEBIT;
+        return new Posting(accountId, opposite, amount);
+    }
 }
