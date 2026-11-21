@@ -9,7 +9,7 @@ public record Posting(String accountId, Direction direction, Money amount) {
         Objects.requireNonNull(accountId, "accountId must not be null");
         Objects.requireNonNull(direction, "direction must not be null");
         Objects.requireNonNull(amount, "amount must not be null");
-        if(amount.isZero() || amount.isNegative()) {
+        if (amount.isZero() || amount.isNegative()) {
             throw new IllegalArgumentException("Posting amount must be positive, got " + amount);
         }
     }
@@ -22,7 +22,7 @@ public record Posting(String accountId, Direction direction, Money amount) {
         return new Posting(accountId, Direction.CREDIT, amount);
     }
 
-    public Money signedAmount(){
+    public Money signedAmount() {
         return direction == Direction.DEBIT ? amount : amount.negate();
     }
 }
