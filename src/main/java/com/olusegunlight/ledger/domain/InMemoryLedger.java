@@ -67,4 +67,8 @@ public class InMemoryLedger {
     private static Money total(List<Posting> postings, Direction direction, LedgerAccount account) {
         return postings.stream().filter(posting -> posting.direction() == direction).map(Posting::amount).reduce(Money.zero(account.currency()), Money::plus);
     }
+
+    public List<JournalEntry> entriesFor(String accountId) {
+        return entries.stream().filter(entry -> entry.accountIds().contains(accountId)).toList();
+    }
 }

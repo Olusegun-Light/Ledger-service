@@ -125,4 +125,20 @@ class InMemoryLedgerTest {
         assertThatThrownBy(() -> ledger.entries().clear())
                 .isInstanceOf(UnsupportedOperationException.class);
     }
+
+    @Test
+    void listsOnlyTheEntriesThatTouchAnAccount() {
+        JournalEntry lightDeposit = factory.toEntry(new Deposit("wallet:light", naira(5_000_00L)));
+        JournalEntry adaDeposit = factory.toEntry(new Deposit("wallet:ada", naira(1_000_00L)));
+        JournalEntry transfer = factory.toEntry(
+                new Transfer("wallet:light", "wallet:ada", naira(2_000_00L), naira(25_00L)));
+        ledger.post(lightDeposit);
+        ledger.post(adaDeposit);
+        ledger.post(transfer);
+
+        assertThat(ledger.entriesFor("wallet:light")).containsExactly(lightDeposit, transfer);
+        assertThat(ledger.entriesFor("wallet:ada")).containsExactly(adaDeposit, transfer);
+        assertThat(ledger.entriesFor(EntryFactory.FEE_ACCOUNT)).containsExactly(transfer);
+        assertThat(ledger.entriesFor(EntryFactory.SETTLEMENT_ACCOUNT)).containsExactly(lightDeposit, adaDeposit);
+    }
 }
