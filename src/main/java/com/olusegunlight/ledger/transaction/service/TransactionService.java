@@ -7,11 +7,12 @@ import com.olusegunlight.ledger.domain.InMemoryLedger;
 import com.olusegunlight.ledger.domain.JournalEntry;
 import com.olusegunlight.ledger.domain.LedgerCommand.Transfer;
 import org.springframework.stereotype.Service;
+import com.olusegunlight.ledger.domain.LedgerCommand.Reversal;
 
 @Service
 public class TransactionService {
 
-    private static final Money TRANSFER_FEE = Money.of(25_00l, Currency.NGN);
+    private static final Money TRANSFER_FEE = Money.of(25_00L, Currency.NGN);
 
     private final InMemoryLedger ledger;
     private final EntryFactory entryFactory;
@@ -26,5 +27,12 @@ public class TransactionService {
         JournalEntry entry = entryFactory.toEntry(new Transfer(fromAccountId, toAccountId, money, TRANSFER_FEE));
         ledger.post(entry);
         return entry;
+    }
+
+    public JournalEntry reverse(String entryId) {
+        JournalEntry original = ledger.findEntry(entryId).orElseThrow(() -> new IllegalArgumentException(("Journal entry not found " + entryId)));
+        JournalEntry reversal = entryFactory.toEntry(new Reversal(original));
+        ledger.post(reversal);
+        return reversal;
     }
 }

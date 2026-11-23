@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
-@RequestMapping("/api/v1/transaction")
+@RequestMapping("/api/v1/transactions")
 @Tag(name = "Transactions", description = "Move money between accounts")
 public class TransactionController {
 
@@ -23,12 +24,19 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @PostMapping("/tranfers")
-    @ResponseStatus(HttpStatus.CREATED])
+    @PostMapping("/transfers")
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Transfer money between wallets (flat ₦25 fee)")
     public EntryResponse transfer(@RequestBody TransferRequest request) {
         return EntryResponse.from(
                 transactionService.transfer(request.fromAccountId(), request.toAccountId(), request.amount()));
+    }
+
+    @PostMapping("/{entryId}/reversals")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Reverse a posted journal entry")
+    public EntryResponse reverse(@PathVariable String entryId) {
+        return EntryResponse.from(transactionService.reverse(entryId));
     }
 
 }
