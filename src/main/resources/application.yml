@@ -7,3 +7,4 @@ spring:
 ledger:
   currency: NGN
   transfer-fee: "25.00"
+  max-transfer-amount: "1000000.00"

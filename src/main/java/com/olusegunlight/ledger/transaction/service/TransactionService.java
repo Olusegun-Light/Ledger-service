@@ -12,8 +12,6 @@ import com.olusegunlight.ledger.domain.LedgerCommand.Reversal;
 @Service
 public class TransactionService {
 
-//    private static final Money TRANSFER_FEE = Money.of(25_00L, Currency.NGN);
-
     private final InMemoryLedger ledger;
     private final EntryFactory entryFactory;
     private final LedgerProperties properties;
@@ -26,6 +24,11 @@ public class TransactionService {
 
     public JournalEntry transfer(String fromAccountId, String toAccountId, String amount) {
         Money money = Money.fromMajor(amount, properties.currency());
+
+        Money limit = properties.maxTransferAmountValue();
+        if(money.isGreaterThan(limit)){
+            throw new IllegalArgumentException("Transfer of " + money + " exceeds the limit of " + limit);
+        }
         JournalEntry entry = entryFactory.toEntry(new Transfer(fromAccountId, toAccountId, money, properties.transferFeeAmount()));
         ledger.post(entry);
         return entry;
