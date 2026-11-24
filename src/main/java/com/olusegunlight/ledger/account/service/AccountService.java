@@ -1,6 +1,6 @@
 package com.olusegunlight.ledger.account.service;
 
-import com.olusegunlight.ledger.common.Currency;
+import com.olusegunlight.ledger.config.LedgerProperties;
 import com.olusegunlight.ledger.common.Money;
 import com.olusegunlight.ledger.domain.AccountType;
 import com.olusegunlight.ledger.domain.ChartOfAccounts;
@@ -19,15 +19,17 @@ public class AccountService {
     private final ChartOfAccounts chart;
     private final InMemoryLedger ledger;
     private final EntryFactory entryFactory;
+    private final LedgerProperties properties;
 
-    public AccountService(ChartOfAccounts chart, InMemoryLedger ledger, EntryFactory entryFactory) {
+    public AccountService(ChartOfAccounts chart, InMemoryLedger ledger, EntryFactory entryFactory, LedgerProperties properties) {
         this.chart = chart;
         this.ledger = ledger;
         this.entryFactory = entryFactory;
+        this.properties = properties;
     }
 
     public LedgerAccount openWallet(String handle, String name) {
-        LedgerAccount wallet = new LedgerAccount("wallet:" + handle, name, AccountType.LIABILITY, Currency.NGN);
+        LedgerAccount wallet = new LedgerAccount("wallet:" + handle, name, AccountType.LIABILITY, properties.currency());
         chart.add(wallet);
         return wallet;
     }
@@ -41,7 +43,7 @@ public class AccountService {
     }
 
     public Money deposit(String walletId, String amount) {
-        Money money = Money.fromMajor(amount, Currency.NGN);
+        Money money = Money.fromMajor(amount, properties.currency());
         ledger.post(entryFactory.toEntry(new Deposit(walletId, money)));
         return ledger.balanceOf(walletId);
     }

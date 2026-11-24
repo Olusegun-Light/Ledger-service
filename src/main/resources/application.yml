@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: ledger-service
+  profiles:
+    default: dev
+
+ledger:
+  currency: NGN
+  transfer-fee: "25.00"

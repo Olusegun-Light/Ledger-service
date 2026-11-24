@@ -1,5 +1,6 @@
 package com.olusegunlight.ledger.config;
 
+import org.springframework.context.annotation.Profile;
 import com.olusegunlight.ledger.account.service.AccountService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("dev")
 public class DemoDataSeeder {
 
     private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
