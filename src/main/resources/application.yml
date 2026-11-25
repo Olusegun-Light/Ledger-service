@@ -3,6 +3,10 @@ spring:
     name: ledger-service
   profiles:
     default: dev
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
 
 ledger:
   currency: NGN
