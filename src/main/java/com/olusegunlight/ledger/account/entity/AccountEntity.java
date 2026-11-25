@@ -63,6 +63,13 @@ public class AccountEntity implements Persistable<String> {
         return new AccountEntity(account.id(), account.name(), account.type(), account.currency());
     }
 
+    public void freeze(){
+        if(status == AccountStatus.CLOSED){
+            throw new IllegalStateException("Cannot freeze closed account " + id);
+        }
+        this.status = AccountStatus.FROZEN;
+    }
+
     public LedgerAccount toDomain() {
         return new LedgerAccount(id, name, type, currency);
     }

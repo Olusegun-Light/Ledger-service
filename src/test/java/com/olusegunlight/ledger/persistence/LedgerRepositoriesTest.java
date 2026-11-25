@@ -90,4 +90,28 @@ class LedgerRepositoriesTest {
                 .extracting(JournalEntryEntity::getId)
                 .containsExactly("entry-1", "entry-2");
     }
+
+    @Test
+    void freezingAnAccountIsSavedWithoutCallingSave() {
+        accounts.save(new AccountEntity("wallet:test", "Test User", AccountType.LIABILITY, Currency.NGN));
+        entityManager.flush();
+        entityManager.clear();
+
+        AccountEntity account = accounts.findById("wallet:test").orElseThrow();
+        account.freeze();
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(accounts.findByStatus(AccountStatus.FROZEN))
+                .extracting(AccountEntity::getId)
+                .containsExactly("wallet:test");
+    }
+
+    @Test
+    void freezingTwiceKeepsTheAccountFrozen() {
+        AccountEntity account = new AccountEntity("wallet:test", "Test User", AccountType.LIABILITY, Currency.NGN);
+        account.freeze();
+        account.freeze();
+        assertThat(account.getStatus()).isEqualTo(AccountStatus.FROZEN);
+    }
 }
