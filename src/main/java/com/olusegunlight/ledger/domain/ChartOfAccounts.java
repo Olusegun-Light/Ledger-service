@@ -10,7 +10,7 @@ public class ChartOfAccounts {
     public void add(LedgerAccount account) {
         LedgerAccount existing = accounts.putIfAbsent(account.id(), account);
         if(existing != null) {
-            throw new IllegalArgumentException("Account already exists: " + account.id());
+            throw new AccountAlreadyExistsException("Account already exists: " + account.id());
         }
     }
 

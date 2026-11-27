@@ -2,12 +2,7 @@ package com.olusegunlight.ledger.persistence;
 
 import com.olusegunlight.ledger.common.Currency;
 import com.olusegunlight.ledger.common.Money;
-import com.olusegunlight.ledger.domain.AccountType;
-import com.olusegunlight.ledger.domain.DuplicateEntryException;
-import com.olusegunlight.ledger.domain.EntryFactory;
-import com.olusegunlight.ledger.domain.InsufficientFundsException;
-import com.olusegunlight.ledger.domain.JournalEntry;
-import com.olusegunlight.ledger.domain.LedgerAccount;
+import com.olusegunlight.ledger.domain.*;
 import com.olusegunlight.ledger.domain.LedgerCommand.Deposit;
 import com.olusegunlight.ledger.domain.LedgerCommand.Transfer;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,7 +68,7 @@ class PostgresLedgerTest {
     void openingAnExistingAccountIsRejected() {
         assertThatThrownBy(() -> ledger.openAccount(
                 new LedgerAccount("wallet:test-a", "Someone else", AccountType.LIABILITY, Currency.NGN)))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(AccountAlreadyExistsException.class)
                 .hasMessageContaining("wallet:test-a");
     }
 }

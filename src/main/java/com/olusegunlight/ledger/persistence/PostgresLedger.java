@@ -4,14 +4,7 @@ import com.olusegunlight.ledger.account.entity.AccountEntity;
 import com.olusegunlight.ledger.account.repository.AccountRepository;
 import com.olusegunlight.ledger.common.CurrencyMismatchException;
 import com.olusegunlight.ledger.common.Money;
-import com.olusegunlight.ledger.domain.AccountType;
-import com.olusegunlight.ledger.domain.Direction;
-import com.olusegunlight.ledger.domain.DuplicateEntryException;
-import com.olusegunlight.ledger.domain.InsufficientFundsException;
-import com.olusegunlight.ledger.domain.JournalEntry;
-import com.olusegunlight.ledger.domain.Ledger;
-import com.olusegunlight.ledger.domain.LedgerAccount;
-import com.olusegunlight.ledger.domain.Posting;
+import com.olusegunlight.ledger.domain.*;
 import com.olusegunlight.ledger.transaction.entity.JournalEntryEntity;
 import com.olusegunlight.ledger.transaction.repository.JournalEntryRepository;
 import com.olusegunlight.ledger.transaction.repository.PostingRepository;
@@ -39,7 +32,7 @@ public class PostgresLedger implements Ledger {
     @Transactional
     public void openAccount(LedgerAccount account) {
         if (accounts.existsById(account.id())) {
-            throw new IllegalArgumentException("Account already exists: " + account.id());
+            throw new AccountAlreadyExistsException("Account already exists: " + account.id());
         }
         accounts.save(AccountEntity.from(account));
     }

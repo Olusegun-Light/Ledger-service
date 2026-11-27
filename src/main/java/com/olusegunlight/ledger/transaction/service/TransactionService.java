@@ -3,6 +3,7 @@ package com.olusegunlight.ledger.transaction.service;
 import com.olusegunlight.ledger.config.LedgerProperties;
 import com.olusegunlight.ledger.common.Money;
 import com.olusegunlight.ledger.domain.EntryFactory;
+import com.olusegunlight.ledger.domain.EntryNotFoundException;
 import com.olusegunlight.ledger.domain.Ledger;
 import com.olusegunlight.ledger.domain.JournalEntry;
 import com.olusegunlight.ledger.domain.LedgerCommand.Transfer;
@@ -35,7 +36,7 @@ public class TransactionService {
     }
 
     public JournalEntry reverse(String entryId) {
-        JournalEntry original = ledger.findEntry(entryId).orElseThrow(() -> new IllegalArgumentException(("Journal entry not found " + entryId)));
+        JournalEntry original = ledger.findEntry(entryId).orElseThrow(() -> new EntryNotFoundException(("Journal entry not found " + entryId)));
         JournalEntry reversal = entryFactory.toEntry(new Reversal(original));
         ledger.post(reversal);
         return reversal;

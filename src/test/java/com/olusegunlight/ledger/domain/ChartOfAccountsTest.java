@@ -37,7 +37,7 @@ class ChartOfAccountsTest {
         chart.add(lightWallet);
 
         assertThatThrownBy(() -> chart.add(lightWallet))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(AccountAlreadyExistsException.class);
         assertThat(chart.size()).isEqualTo(1);
     }
 }
