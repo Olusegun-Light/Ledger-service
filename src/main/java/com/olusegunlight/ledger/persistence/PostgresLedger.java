@@ -32,7 +32,7 @@ public class PostgresLedger implements Ledger {
     @Transactional
     public void openAccount(LedgerAccount account) {
         if (accounts.existsById(account.id())) {
-            throw new AccountAlreadyExistsException("Account already exists: " + account.id());
+            throw new AccountAlreadyExistsException(account.id());
         }
         accounts.save(AccountEntity.from(account));
     }

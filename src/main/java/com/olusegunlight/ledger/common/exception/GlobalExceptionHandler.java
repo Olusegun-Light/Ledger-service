@@ -61,13 +61,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", "Something went wrong on our side. Please try again later.", "INTERNAL_ERROR");
     }
 
-    private static ProblemDetail problem(HttpStatus status, String title, String detail, String code) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
-        problem.setTitle(title);
-        problem.setProperty("code", code);
-        return problem;
-    }
-
     @ExceptionHandler(TransferLimitExceededException.class)
     ProblemDetail handleTransferLimitExceeded(TransferLimitExceededException ex) {
         ProblemDetail problem = problem(HttpStatus.UNPROCESSABLE_CONTENT, "Transfer limit exceeded",
@@ -76,4 +69,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
+    private static ProblemDetail problem(HttpStatus status, String title, String detail, String code) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
+        problem.setTitle(title);
+        problem.setProperty("code", code);
+        return problem;
+    }
 }
