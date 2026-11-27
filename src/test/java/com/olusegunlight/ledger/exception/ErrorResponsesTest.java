@@ -85,4 +85,21 @@ class ErrorResponsesTest {
                 .content("{\"handle\": \"" + handle + "\", \"name\": \"Test\"}"))
                 .hasStatus(HttpStatus.CREATED);
     }
+
+    @Test
+    void transferAboveTheLimitIs422WithTheLimit() {
+        openWallet("err-big-from");
+        openWallet("err-big-to");
+
+        var response = assertThat(mvc.post().uri("/api/v1/transactions/transfers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"fromAccountId": "wallet:err-big-from", "toAccountId": "wallet:err-big-to", "amount": "1000000.01"}
+                        """))
+                .hasStatus(HttpStatus.UNPROCESSABLE_CONTENT)
+                .bodyJson();
+
+        response.extractingPath("$.code").isEqualTo("TRANSFER_LIMIT_EXCEEDED");
+        response.extractingPath("$.limit").isEqualTo("1000000.00");
+    }
 }

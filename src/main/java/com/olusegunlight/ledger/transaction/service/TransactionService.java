@@ -28,7 +28,7 @@ public class TransactionService {
 
         Money limit = properties.maxTransferAmountValue();
         if(money.isGreaterThan(limit)){
-            throw new IllegalArgumentException("Transfer of " + money + " exceeds the limit of " + limit);
+            throw new TransferLimitExceededException(money, limit);
         }
         JournalEntry entry = entryFactory.toEntry(new Transfer(fromAccountId, toAccountId, money, properties.transferFeeAmount()));
         ledger.post(entry);
@@ -36,7 +36,7 @@ public class TransactionService {
     }
 
     public JournalEntry reverse(String entryId) {
-        JournalEntry original = ledger.findEntry(entryId).orElseThrow(() -> new EntryNotFoundException(("Journal entry not found " + entryId)));
+        JournalEntry original = ledger.findEntry(entryId).orElseThrow(() -> new EntryNotFoundException(entryId));
         JournalEntry reversal = entryFactory.toEntry(new Reversal(original));
         ledger.post(reversal);
         return reversal;

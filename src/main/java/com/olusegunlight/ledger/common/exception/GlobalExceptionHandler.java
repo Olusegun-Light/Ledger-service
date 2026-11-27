@@ -6,6 +6,7 @@ import com.olusegunlight.ledger.domain.AccountNotFoundException;
 import com.olusegunlight.ledger.domain.DuplicateEntryException;
 import com.olusegunlight.ledger.domain.EntryNotFoundException;
 import com.olusegunlight.ledger.domain.InsufficientFundsException;
+import com.olusegunlight.ledger.transaction.service.TransferLimitExceededException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -64,6 +65,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
         problem.setTitle(title);
         problem.setProperty("code", code);
+        return problem;
+    }
+
+    @ExceptionHandler(TransferLimitExceededException.class)
+    ProblemDetail handleTransferLimitExceeded(TransferLimitExceededException ex) {
+        ProblemDetail problem = problem(HttpStatus.UNPROCESSABLE_CONTENT, "Transfer limit exceeded",
+                ex.getMessage(), "TRANSFER_LIMIT_EXCEEDED");
+        problem.setProperty("limit", ex.getLimit().toMajor().toPlainString());
         return problem;
     }
 
