@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/transactions")
@@ -27,7 +28,7 @@ public class TransactionController {
     @PostMapping("/transfers")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Transfer money between wallets (flat ₦25 fee)")
-    public EntryResponse transfer(@RequestBody TransferRequest request) {
+    public EntryResponse transfer(@Valid @RequestBody TransferRequest request) {
         return EntryResponse.from(
                 transactionService.transfer(request.fromAccountId(), request.toAccountId(), request.amount()));
     }

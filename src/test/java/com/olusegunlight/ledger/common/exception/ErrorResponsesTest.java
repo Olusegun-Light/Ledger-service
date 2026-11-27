@@ -68,7 +68,7 @@ class ErrorResponsesTest {
                         """))
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .bodyJson()
-                .extractingPath("$.code").isEqualTo("INVALID_REQUEST");
+                .extractingPath("$.code").isEqualTo("VALIDATION_FAILED");
     }
 
     @Test
@@ -142,5 +142,29 @@ class ErrorResponsesTest {
                         """))
                 .hasStatus(HttpStatus.CREATED)
                 .hasHeader("Location", "http://localhost/api/v1/accounts/wallet:val-location");
+    }
+
+    @Test
+    void transferToTheSameWalletIs400() {
+        var response = assertThat(mvc.post().uri("/api/v1/transactions/transfers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"fromAccountId": "wallet:val-self", "toAccountId": "wallet:val-self", "amount": "100.00"}
+                        """))
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson();
+
+        response.extractingPath("$.code").isEqualTo("VALIDATION_FAILED");
+        response.extractingPath("$.errors[0].field").isEqualTo("toAccountDifferent");
+    }
+
+    @Test
+    void transferWithMissingFieldsIs400() {
+        assertThat(mvc.post().uri("/api/v1/transactions/transfers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .extractingPath("$.errors.length()").isEqualTo(3);
     }
 }
