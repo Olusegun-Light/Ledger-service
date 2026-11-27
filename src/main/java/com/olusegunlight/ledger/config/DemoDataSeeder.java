@@ -35,6 +35,6 @@ public class DemoDataSeeder {
 
     @PreDestroy
     void shutdown() {
-        log.info("3. @PreDestroy — application shutting down, in-memory data will be lost");
+        log.info("3. @PreDestroy — application shutting down, data stays in Postgres");
     }
 }

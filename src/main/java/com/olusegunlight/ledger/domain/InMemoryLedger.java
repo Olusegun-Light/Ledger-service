@@ -29,6 +29,7 @@ public class InMemoryLedger implements Ledger {
         return chart.find(accountId);
     }
 
+    @Override
     public void post(JournalEntry entry) {
         if (postedIds.contains(entry.id())) {
             throw new DuplicateEntryException((entry.id()));
@@ -54,10 +55,12 @@ public class InMemoryLedger implements Ledger {
         postedIds.add(entry.id());
     }
 
+    @Override
     public Money balanceOf(String accountId) {
         return balanceOf(chart.get(accountId), entries);
     }
 
+    @Override
     public Optional<JournalEntry> findEntry(String entryId) {
         return entries.stream().filter(entry -> entry.id().equals(entryId)).findFirst();
     }
@@ -78,6 +81,7 @@ public class InMemoryLedger implements Ledger {
         return postings.stream().filter(posting -> posting.direction() == direction).map(Posting::amount).reduce(Money.zero(account.currency()), Money::plus);
     }
 
+    @Override
     public List<JournalEntry> entriesFor(String accountId) {
         return entries.stream().filter(entry -> entry.accountIds().contains(accountId)).toList();
     }

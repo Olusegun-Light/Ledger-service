@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class LedgerConfig {
 
     @Bean
-    public EntryFactory entryfactory() {
+    public EntryFactory entryFactory() {
         return new EntryFactory();
     }
 

@@ -18,7 +18,7 @@ public interface Ledger {
 
     Money balanceOf(String accountId);
 
-    Optional<JournalEntry> findEntry(String accountId);
+    Optional<JournalEntry> findEntry(String entryId);
 
     List<JournalEntry> entriesFor(String accountId);
 }

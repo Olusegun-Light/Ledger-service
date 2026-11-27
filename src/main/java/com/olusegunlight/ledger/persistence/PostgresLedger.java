@@ -82,9 +82,7 @@ public class PostgresLedger implements Ledger {
 
     @Override
     public List<JournalEntry> entriesFor(String accountId) {
-        return journalEntries.findAllTouchingAccount(accountId).stream()
-                .map(JournalEntryEntity::toDomain)
-                .toList();
+        return journalEntries.findAllTouchingAccount(accountId).stream().map(JournalEntryEntity::toDomain).toList();
     }
 
     private Money balanceAfter(LedgerAccount account, JournalEntry entry) {
@@ -98,12 +96,8 @@ public class PostgresLedger implements Ledger {
     }
 
     private static Money inEntry(JournalEntry entry, LedgerAccount account, Direction direction) {
-        return entry.postings().stream().filter(posting -> posting.accountId().equals(account.id()))
-                .filter(posting -> posting.direction() == direction)
-                .map(Posting::amount)
-                .reduce(Money.zero(account.currency()), Money::plus);
+        return entry.postings().stream().filter(posting -> posting.accountId().equals(account.id())).filter(posting -> posting.direction() == direction).map(Posting::amount).reduce(Money.zero(account.currency()), Money::plus);
     }
-
 
 
 }
