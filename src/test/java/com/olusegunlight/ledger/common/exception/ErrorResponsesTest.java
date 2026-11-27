@@ -102,4 +102,45 @@ class ErrorResponsesTest {
         response.extractingPath("$.code").isEqualTo("TRANSFER_LIMIT_EXCEEDED");
         response.extractingPath("$.limit").isEqualTo("1000000.00");
     }
+
+    @Test
+    void depositWithoutAnAmountIs400NamingTheField() {
+        openWallet("val-empty");
+
+        var response = assertThat(mvc.post().uri("/api/v1/accounts/{id}/deposits", "wallet:val-empty")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson();
+
+        response.extractingPath("$.code").isEqualTo("VALIDATION_FAILED");
+        response.extractingPath("$.errors[0].field").isEqualTo("amount");
+        response.extractingPath("$.errors[0].message").isEqualTo("must not be null");
+    }
+
+    @Test
+    void openAccountReportsEveryInvalidField() {
+        var response = assertThat(mvc.post().uri("/api/v1/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"handle": "Bad Handle!", "name": ""}
+                        """))
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson();
+
+        response.extractingPath("$.errors.length()").isEqualTo(2);
+        response.extractingPath("$.errors[0].field").isEqualTo("handle");
+        response.extractingPath("$.errors[1].field").isEqualTo("name");
+    }
+
+    @Test
+    void openingAWalletReturnsItsLocation() {
+        assertThat(mvc.post().uri("/api/v1/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"handle": "val-location", "name": "Located"}
+                        """))
+                .hasStatus(HttpStatus.CREATED)
+                .hasHeader("Location", "http://localhost/api/v1/accounts/wallet:val-location");
+    }
 }

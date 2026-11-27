@@ -18,6 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import com.olusegunlight.ledger.transaction.dto.EntryResponse;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+
 @RestController
 @RequestMapping("/api/v1/accounts")
 @Tag(name = "Accounts", description = "Open wallets, deposit money and check balances")
@@ -30,11 +40,21 @@ public class AccountController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Open a customer wallet")
-    public AccountResponse open(@RequestBody OpenAccountRequest request) {
-        return AccountResponse.from(accountService.openWallet(request.handle(), request.name()));
+    @ApiResponse(responseCode = "201", description = "Wallet opened; Location header points to it")
+    @ApiResponse(responseCode = "400", description = "Invalid handle or name",
+            content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "409", description = "A wallet with this handle already exists",
+            content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    public ResponseEntity<AccountResponse> open(@Valid @RequestBody OpenAccountRequest request) {
+        AccountResponse account = AccountResponse.from(accountService.openWallet(request.handle(), request.name()));
+        URI location =  ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{accountId}")
+                .buildAndExpand(account.id())
+                .toUri();
+        return ResponseEntity.created(location).body(account);
     }
+
 
     @GetMapping("/{accountId}/balance")
     @Operation(summary = "Get an account's current balance")
@@ -45,7 +65,7 @@ public class AccountController {
     @PostMapping("/{accountId}/deposits")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Deposit money into a wallet")
-    public BalanceResponse deposit(@PathVariable String accountId, @RequestBody DepositRequest request) {
+    public BalanceResponse deposit(@PathVariable String accountId, @Valid @RequestBody DepositRequest request) {
         return BalanceResponse.of(accountId, accountService.deposit(accountId, request.amount()));
     }
 

@@ -14,6 +14,14 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.context.request.WebRequest;
+
+import java.util.Comparator;
+import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -67,6 +75,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getMessage(), "TRANSFER_LIMIT_EXCEEDED");
         problem.setProperty("limit", ex.getLimit().toMajor().toPlainString());
         return problem;
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        List<FieldViolation> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> new FieldViolation(error.getField(), error.getDefaultMessage()))
+                .sorted(Comparator.comparing(FieldViolation::field).thenComparing(FieldViolation::message))
+                .toList();
+
+        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "Validation failed",
+                "The request has " + errors.size() + " invalid field(s)", "VALIDATION_FAILED");
+        problem.setProperty("errors", errors);
+        return handleExceptionInternal(ex, problem, headers, status, request);
     }
 
     private static ProblemDetail problem(HttpStatus status, String title, String detail, String code) {
