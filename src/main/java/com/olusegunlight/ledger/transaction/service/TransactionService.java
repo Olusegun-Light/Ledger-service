@@ -3,7 +3,7 @@ package com.olusegunlight.ledger.transaction.service;
 import com.olusegunlight.ledger.config.LedgerProperties;
 import com.olusegunlight.ledger.common.Money;
 import com.olusegunlight.ledger.domain.EntryFactory;
-import com.olusegunlight.ledger.domain.InMemoryLedger;
+import com.olusegunlight.ledger.domain.Ledger;
 import com.olusegunlight.ledger.domain.JournalEntry;
 import com.olusegunlight.ledger.domain.LedgerCommand.Transfer;
 import org.springframework.stereotype.Service;
@@ -12,11 +12,11 @@ import com.olusegunlight.ledger.domain.LedgerCommand.Reversal;
 @Service
 public class TransactionService {
 
-    private final InMemoryLedger ledger;
+    private final Ledger ledger;
     private final EntryFactory entryFactory;
     private final LedgerProperties properties;
 
-    public TransactionService(InMemoryLedger ledger, EntryFactory entryFactory, LedgerProperties properties) {
+    public TransactionService(Ledger ledger, EntryFactory entryFactory, LedgerProperties properties) {
         this.ledger = ledger;
         this.entryFactory = entryFactory;
         this.properties = properties;

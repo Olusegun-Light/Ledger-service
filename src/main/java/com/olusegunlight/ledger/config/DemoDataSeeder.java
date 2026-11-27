@@ -23,6 +23,10 @@ public class DemoDataSeeder {
 
     @PostConstruct
     void seed() {
+        if (accountService.exists("wallet:light")) {
+            log.info("2. @PostConstruct — demo wallets already in the database, skipping seed");
+            return;
+        }
         accountService.openWallet("light", "Light Olusegun");
         accountService.openWallet("ada", "Ada Obi");
         accountService.deposit("wallet:light", "50000.00");

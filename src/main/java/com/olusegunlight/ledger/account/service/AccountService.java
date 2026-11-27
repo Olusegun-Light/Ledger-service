@@ -1,28 +1,25 @@
 package com.olusegunlight.ledger.account.service;
 
-import com.olusegunlight.ledger.config.LedgerProperties;
 import com.olusegunlight.ledger.common.Money;
+import com.olusegunlight.ledger.config.LedgerProperties;
 import com.olusegunlight.ledger.domain.AccountType;
-import com.olusegunlight.ledger.domain.ChartOfAccounts;
 import com.olusegunlight.ledger.domain.EntryFactory;
-import com.olusegunlight.ledger.domain.InMemoryLedger;
+import com.olusegunlight.ledger.domain.JournalEntry;
+import com.olusegunlight.ledger.domain.Ledger;
 import com.olusegunlight.ledger.domain.LedgerAccount;
 import com.olusegunlight.ledger.domain.LedgerCommand.Deposit;
 import org.springframework.stereotype.Service;
-import com.olusegunlight.ledger.domain.JournalEntry;
 
 import java.util.List;
 
 @Service
 public class AccountService {
 
-    private final ChartOfAccounts chart;
-    private final InMemoryLedger ledger;
+    private final Ledger ledger;
     private final EntryFactory entryFactory;
     private final LedgerProperties properties;
 
-    public AccountService(ChartOfAccounts chart, InMemoryLedger ledger, EntryFactory entryFactory, LedgerProperties properties) {
-        this.chart = chart;
+    public AccountService(Ledger ledger, EntryFactory entryFactory, LedgerProperties properties) {
         this.ledger = ledger;
         this.entryFactory = entryFactory;
         this.properties = properties;
@@ -30,12 +27,16 @@ public class AccountService {
 
     public LedgerAccount openWallet(String handle, String name) {
         LedgerAccount wallet = new LedgerAccount("wallet:" + handle, name, AccountType.LIABILITY, properties.currency());
-        chart.add(wallet);
+        ledger.openAccount(wallet);
         return wallet;
     }
 
+    public boolean exists(String accountId) {
+        return ledger.findAccount(accountId).isPresent();
+    }
+
     public LedgerAccount getAccount(String accountId){
-        return chart.get(accountId);
+        return ledger.getAccount(accountId);
     }
 
     public Money balanceOf(String accountId) {
@@ -49,7 +50,7 @@ public class AccountService {
     }
 
     public List<JournalEntry> statement(String accountId) {
-        chart.get(accountId);
+        ledger.getAccount(accountId);
         return ledger.entriesFor(accountId);
     }
 }

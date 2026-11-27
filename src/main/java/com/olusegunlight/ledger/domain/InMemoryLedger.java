@@ -10,13 +10,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class InMemoryLedger {
+public class InMemoryLedger implements Ledger {
     private final ChartOfAccounts chart;
     private final List<JournalEntry> entries = new ArrayList<>();
     private final Set<String> postedIds = new HashSet<>();
 
     public InMemoryLedger(ChartOfAccounts chart) {
         this.chart = chart;
+    }
+
+    @Override
+    public void openAccount(LedgerAccount account) {
+        chart.add(account);
+    }
+
+    @Override
+    public Optional<LedgerAccount> findAccount(String accountId) {
+        return chart.find(accountId);
     }
 
     public void post(JournalEntry entry) {
