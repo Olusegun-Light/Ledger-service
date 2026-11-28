@@ -49,13 +49,22 @@ public class PostgresLedger implements Ledger {
             throw new DuplicateEntryException(entry.id());
         }
 
-        for (String accountId : entry.accountIds()) {
-            LedgerAccount account = getAccount(accountId);
+        List<LedgerAccount> involved = entry.accountIds().stream().map(this::getAccount).toList();
+        for (LedgerAccount account : involved) {
             if (account.currency() != entry.currency()) {
                 throw new CurrencyMismatchException(account.currency(), entry.currency());
             }
+        }
+
+        List<String> wallets = involved.stream()
+                .filter(account -> account.type() == AccountType.LIABILITY)
+                .map(LedgerAccount::id)
+                .toList();
+        accounts.lockAllById(wallets);
+
+        for (LedgerAccount account : involved) {
             if (account.type() == AccountType.LIABILITY && balanceAfter(account, entry).isNegative()) {
-                throw new InsufficientFundsException(accountId);
+                throw new InsufficientFundsException(account.id());
             }
         }
 

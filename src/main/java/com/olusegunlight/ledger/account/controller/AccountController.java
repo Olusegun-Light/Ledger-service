@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
+
 import com.olusegunlight.ledger.transaction.dto.EntryResponse;
 
 import io.swagger.v3.oas.annotations.media.Content;
@@ -48,7 +50,7 @@ public class AccountController {
             content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     public ResponseEntity<AccountResponse> open(@Valid @RequestBody OpenAccountRequest request) {
         AccountResponse account = AccountResponse.from(accountService.openWallet(request.handle(), request.name()));
-        URI location =  ServletUriComponentsBuilder.fromCurrentRequest()
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{accountId}")
                 .buildAndExpand(account.id())
                 .toUri();
@@ -71,7 +73,7 @@ public class AccountController {
 
     @GetMapping("/{accountId}")
     @Operation(summary = "Get  an account's details")
-    public AccountResponse open(@PathVariable String accountId){
+    public AccountResponse open(@PathVariable String accountId) {
         return AccountResponse.from(accountService.getAccount(accountId));
     }
 
