@@ -21,4 +21,7 @@ public interface AccountRepository extends JpaRepository<AccountEntity, String> 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select a from AccountEntity a where a.id in :ids order by a.id")
     List<AccountEntity> lockAllById(Collection<String> ids);
+
+    @Query("select a.status from AccountEntity a where a.id = :id")
+    AccountStatus findStatusById(String id);
 }

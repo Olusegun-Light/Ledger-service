@@ -22,6 +22,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.Comparator;
 import java.util.List;
+import com.olusegunlight.ledger.domain.AccountNotActiveException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -66,7 +67,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     ProblemDetail handleException(Exception ex) {
         log.error("Unhandled exception", ex);
-        return problem(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", "Something went wrong on our side. Please try again later.", "INTERNAL_ERROR");
+        return problem(HttpStatus.INTERNAL_SERVER_ERROR, "InternaPostgresLedgerTest.javal error", "Something went wrong on our side. Please try again later.", "INTERNAL_ERROR");
     }
 
     @ExceptionHandler(TransferLimitExceededException.class)
@@ -75,6 +76,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getMessage(), "TRANSFER_LIMIT_EXCEEDED");
         problem.setProperty("limit", ex.getLimit().toMajor().toPlainString());
         return problem;
+    }
+
+    @ExceptionHandler(AccountNotActiveException.class)
+    ProblemDetail handleAccountNotActive(AccountNotActiveException ex) {
+        return problem(HttpStatus.UNPROCESSABLE_CONTENT, "Account not active", ex.getMessage(), "ACCOUNT_NOT_ACTIVE");
     }
 
     @Override

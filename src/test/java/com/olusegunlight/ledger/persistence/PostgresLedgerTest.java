@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import com.olusegunlight.ledger.account.repository.AccountRepository;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -22,6 +23,9 @@ class PostgresLedgerTest {
 
     @Autowired
     PostgresLedger ledger;
+
+    @Autowired
+    AccountRepository accounts;
 
     private final EntryFactory factory = new EntryFactory();
 
@@ -70,5 +74,19 @@ class PostgresLedgerTest {
                 new LedgerAccount("wallet:test-a", "Someone else", AccountType.LIABILITY, Currency.NGN)))
                 .isInstanceOf(AccountAlreadyExistsException.class)
                 .hasMessageContaining("wallet:test-a");
+    }
+
+    @Test
+    void aFrozenWalletCannotBeDebitedButCanStillReceiveMoney() {
+        ledger.post(factory.toEntry(new Deposit("wallet:test-a", naira(1_000_00))));
+        accounts.findById("wallet:test-a").orElseThrow().freeze();
+
+        assertThatThrownBy(() -> ledger.post(factory.toEntry(
+                new Transfer("wallet:test-a", "wallet:test-b", naira(100_00), naira(25_00)))))
+                .isInstanceOf(AccountNotActiveException.class)
+                .hasMessageContaining("FROZEN");
+
+        ledger.post(factory.toEntry(new Deposit("wallet:test-a", naira(500_00))));
+        assertThat(ledger.balanceOf("wallet:test-a")).isEqualTo(naira(1_500_00));
     }
 }
