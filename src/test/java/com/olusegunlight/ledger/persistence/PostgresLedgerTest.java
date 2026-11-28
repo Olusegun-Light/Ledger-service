@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Import;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.olusegunlight.ledger.account.repository.AccountRepository;
+import com.olusegunlight.ledger.common.CurrencyMismatchException;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -88,5 +89,13 @@ class PostgresLedgerTest {
 
         ledger.post(factory.toEntry(new Deposit("wallet:test-a", naira(500_00))));
         assertThat(ledger.balanceOf("wallet:test-a")).isEqualTo(naira(1_500_00));
+    }
+
+    @Test
+    void nairaCannotBePostedIntoADollarWallet() {
+        ledger.openAccount(new LedgerAccount("wallet:test-usd", "Dollar", AccountType.LIABILITY, Currency.USD));
+
+        assertThatThrownBy(() -> ledger.post(factory.toEntry(new Deposit("wallet:test-usd", naira(100_00)))))
+                .isInstanceOf(CurrencyMismatchException.class);
     }
 }

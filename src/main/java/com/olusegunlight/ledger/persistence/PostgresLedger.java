@@ -51,17 +51,8 @@ public class PostgresLedger implements Ledger {
 
         List<LedgerAccount> involved = entry.accountIds().stream().map(this::getAccount).toList();
         for (LedgerAccount account : involved) {
-            if (account.type() != AccountType.LIABILITY) {
-                continue;
-            }
-            if (!inEntry(entry, account, Direction.DEBIT).isZero()) {
-                AccountStatus status = accounts.findStatusById(account.id());
-                if (status != AccountStatus.ACTIVE) {
-                    throw new AccountNotActiveException(account.id(), status);
-                }
-            }
-            if (balanceAfter(account, entry).isNegative()) {
-                throw new InsufficientFundsException(account.id());
+            if (account.currency() != entry.currency()) {
+                throw new CurrencyMismatchException(account.currency(), entry.currency());
             }
         }
 
@@ -72,7 +63,16 @@ public class PostgresLedger implements Ledger {
         accounts.lockAllById(wallets);
 
         for (LedgerAccount account : involved) {
-            if (account.type() == AccountType.LIABILITY && balanceAfter(account, entry).isNegative()) {
+            if (account.type() != AccountType.LIABILITY) {
+                continue;
+            }
+            if (!inEntry(entry, account, Direction.DEBIT).isZero()) {
+                AccountStatus status = accounts.findStatusById(account.id());
+                if (status != AccountStatus.ACTIVE) {
+                    throw new AccountNotActiveException(account.id(), status);
+                }
+            }
+            if (balanceAfter(account, entry).isNegative()) {
                 throw new InsufficientFundsException(account.id());
             }
         }
