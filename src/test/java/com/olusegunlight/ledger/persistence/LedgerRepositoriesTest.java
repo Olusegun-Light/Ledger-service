@@ -16,6 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -113,5 +116,25 @@ class LedgerRepositoriesTest {
         account.freeze();
         account.freeze();
         assertThat(account.getStatus()).isEqualTo(AccountStatus.FROZEN);
+    }
+
+    @Test
+    void aStaleCopyCannotOverwriteANewerChange() {
+        accounts.save(new AccountEntity("wallet:test", "Test User", AccountType.LIABILITY, Currency.NGN));
+        entityManager.flush();
+        entityManager.clear();
+
+        AccountEntity supportCopy = accounts.findById("wallet:test").orElseThrow();
+        entityManager.detach(supportCopy);
+
+        AccountEntity complianceCopy = accounts.findById("wallet:test").orElseThrow();
+        complianceCopy.freeze();
+        entityManager.flush();
+        entityManager.clear();
+
+        supportCopy.rename("Test User Jr");
+
+        assertThatThrownBy(() -> accounts.saveAndFlush(supportCopy))
+                .isInstanceOf(ObjectOptimisticLockingFailureException.class);
     }
 }

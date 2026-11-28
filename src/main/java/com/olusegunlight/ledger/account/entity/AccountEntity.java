@@ -16,6 +16,7 @@ import jakarta.persistence.Transient;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
+import jakarta.persistence.Version;
 
 import java.time.Instant;
 
@@ -45,10 +46,14 @@ public class AccountEntity implements Persistable<String> {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Version
+    private long version;
+
     @Transient
     private boolean newEntity = true;
 
-    protected AccountEntity() {}
+    protected AccountEntity() {
+    }
 
     public AccountEntity(String id, String name, AccountType type, Currency currency) {
         this.id = id;
@@ -63,8 +68,12 @@ public class AccountEntity implements Persistable<String> {
         return new AccountEntity(account.id(), account.name(), account.type(), account.currency());
     }
 
-    public void freeze(){
-        if(status == AccountStatus.CLOSED){
+    public void rename(String newName) {
+        this.name = newName;
+    }
+
+    public void freeze() {
+        if (status == AccountStatus.CLOSED) {
             throw new IllegalStateException("Cannot freeze closed account " + id);
         }
         this.status = AccountStatus.FROZEN;
@@ -75,7 +84,7 @@ public class AccountEntity implements Persistable<String> {
     }
 
     @Override
-    public String getId(){
+    public String getId() {
         return id;
     }
 
@@ -99,8 +108,12 @@ public class AccountEntity implements Persistable<String> {
         return createdAt;
     }
 
+    public long getVersion() {
+        return version;
+    }
+
     @Override
-    public boolean isNew(){
+    public boolean isNew() {
         return newEntity;
     }
 
